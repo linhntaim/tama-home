@@ -89,4 +89,10 @@ export class StarterService extends Service {
             }),
         )
     }
+
+    post(url, params = {}) {
+        return this.response(
+            this.request.post(url, params),
+        )
+    }
 }
