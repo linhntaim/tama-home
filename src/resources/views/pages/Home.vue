@@ -87,15 +87,28 @@ export default {
     },
     methods: {
         onExchangeChange() {
-            this.loading._ = true
-            Promise.all([
-                this.$service(ExchangeService)
-                    .done(data => this.symbols = data.symbols)
-                    .symbolIndex(this.exchange),
-                this.$service(ExchangeService)
-                    .done(data => this.intervals = data.intervals)
-                    .intervalIndex(this.exchange),
-            ]).then(() => this.loading._ = false)
+            const exchange = this.$cache.get('exchange')
+            if (exchange) {
+                this.symbols = exchange.symbols
+                this.intervals = exchange.intervals
+            }
+            else {
+                this.loading._ = true
+                Promise.all([
+                    this.$service(ExchangeService)
+                        .done(data => this.symbols = data.symbols)
+                        .symbolIndex(this.exchange),
+                    this.$service(ExchangeService)
+                        .done(data => this.intervals = data.intervals)
+                        .intervalIndex(this.exchange),
+                ]).then(() => {
+                    this.$cache.set('exchange', {
+                        symbols: this.symbols,
+                        intervals: this.intervals,
+                    })
+                    this.loading._ = false
+                })
+            }
         },
         onSubmit() {
             this.loading._ = true
