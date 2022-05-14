@@ -3,7 +3,7 @@ form.row.row-cols-lg-auto.g-3.align-items-center(@submit.prevent="onSubmit" meth
     .col-12
         label.visually-hidden(for="inputExchange") Exchange
         select#inputExchange.form-select(v-model="exchange")
-            option(v-for="(text, value) in exchanges" :key="value" :value="value") {{ text }}
+            option(v-for="item in exchanges" :key="item.id" :value="item.id") {{ item.name }}
     .col-12
         label.visually-hidden(for="inputSymbol") Symbol
         select#inputSymbol.form-select(v-model="symbol")
@@ -15,7 +15,7 @@ form.row.row-cols-lg-auto.g-3.align-items-center(@submit.prevent="onSubmit" meth
     .col-12
         label.visually-hidden(for="inputIndicator") Indicator
         select#inputIndicator.form-select(v-model="indicator")
-            option(v-for="(text, value) in indicators" :key="value" :value="value") {{ text }}
+            option(v-for="value in indicators" :key="value.id" :value="value.id") {{ value.name }}
     .col-12
         button.btn.btn-primary(type="submit" :disabled="loading._") Submit
 .mt-3.table-responsive
@@ -62,16 +62,19 @@ export default {
                 _: false,
             },
 
+            exchanges: [],
             symbols: [],
             intervals: [],
-            exchanges: {},
-            indicators: {
-                rsi: 'RSI Indicator',
-            },
+            indicators: [
+                {
+                    id: 'rsi',
+                    name: 'RSI Indicator',
+                },
+            ],
 
             exchange: null,
-            symbol: 'BTCUSDT',
-            interval: '1d',
+            symbol: null,
+            interval: null,
             indicator: 'rsi',
 
             swingTrades: [],
@@ -87,7 +90,7 @@ export default {
         this.$service(ExchangeService)
             .done(data => {
                 this.exchanges = data.exchanges
-                this.exchange = (exchanges => exchanges.length ? exchanges[0] : null)(Object.keys(data.exchanges))
+                this.exchange = data.exchanges.length ? data.exchanges[0].id : null
                 this.loading._ = false
                 this.onExchangeChange()
             })
@@ -99,21 +102,31 @@ export default {
                 const exchange = this.$cache.get(this.exchangeCacheKey)
                 if (exchange) {
                     this.symbols = exchange.symbols
+                    this.symbol = exchange.defaultSymbol
                     this.intervals = exchange.intervals
+                    this.interval = exchange.defaultInterval
                 }
                 else {
                     this.loading._ = true
                     Promise.all([
                         this.$service(ExchangeService)
-                            .done(data => this.symbols = data.symbols)
+                            .done(data => {
+                                this.symbols = data.symbols
+                                this.symbol = data.default
+                            })
                             .symbolIndex(this.exchange),
                         this.$service(ExchangeService)
-                            .done(data => this.intervals = data.intervals)
+                            .done(data => {
+                                this.intervals = data.intervals
+                                this.interval = data.default
+                            })
                             .intervalIndex(this.exchange),
                     ]).then(() => {
                         this.$cache.set(this.exchangeCacheKey, {
                             symbols: this.symbols,
+                            defaultSymbol: this.symbol,
                             intervals: this.intervals,
+                            defaultInterval: this.interval,
                         })
                         this.loading._ = false
                     })
