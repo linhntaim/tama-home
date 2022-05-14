@@ -29,8 +29,17 @@ export const routes = [
             //
             {
                 path: '/',
-                name: 'home',
-                component: () => import('@/resources/views/pages/Home.vue'),
+                redirect: 'trading',
+            },
+            {
+                path: 'trading',
+                name: 'trading',
+                component: () => import('@/resources/views/pages/Trading.vue'),
+            },
+            {
+                path: 'holding',
+                name: 'holding',
+                component: () => import('@/resources/views/pages/Holding.vue'),
             },
             //
             {

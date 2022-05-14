@@ -1,6 +1,10 @@
 import {StarterService} from '@/app/support/services'
 
 export class ExchangeService extends StarterService {
+    index() {
+        return this.get(`exchange`)
+    }
+
     symbolIndex(exchange) {
         return this.get(`exchange/${exchange}/symbol`)
     }

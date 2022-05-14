@@ -10,7 +10,7 @@ export const ping = {
     mutations: {
         setAvailable(state, available) {
             state.available = available
-            state.expiredAt = new Date().getTime() + 60 * 1000
+            state.expiredAt = new Date().getTime() + app.$config.get('app.ping.expired_in', 60 * 1000)
 
             app.$cache.set('ping', {
                 available: state.available,

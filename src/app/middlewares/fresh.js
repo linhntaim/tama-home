@@ -16,7 +16,6 @@ export class Fresh extends Middleware
 
     restoreFromCache() {
         app.$log.info('middleware', 'fresh.restoreFromCache')
-        app.$store.commit('ping/setFromCache')
     }
 
     restoreFromCookie() {
