@@ -1,6 +1,6 @@
 import {middlewares} from '@/app/middlewares'
 import Base from '@/resources/views/master/Base'
-import BaseBlank from '@/resources/views/master/BaseBlank'
+import BaseError from '@/resources/views/master/BaseError'
 
 export const routes = [
     {
@@ -12,39 +12,39 @@ export const routes = [
         children: [
             {
                 path: 'error',
-                component: BaseBlank,
+                component: BaseError,
                 children: [
                     {
                         path: 'connection-lost',
                         name: 'connection_lost',
-                        component: () => import('@/resources/views/errors/ConnectionLost.vue'),
+                        component: () => import('@/resources/views/errors/ConnectionLost'),
                     },
                     {
                         path: '404',
                         name: 'not_found',
-                        component: () => import('@/resources/views/errors/NotFound.vue'),
+                        component: () => import('@/resources/views/errors/NotFound'),
                     },
                 ],
             },
             //
             {
                 path: '/',
-                redirect: 'trading',
-            },
-            {
-                path: 'trading',
-                name: 'trading',
-                component: () => import('@/resources/views/pages/Trading.vue'),
+                redirect: 'holding',
             },
             {
                 path: 'holding',
                 name: 'holding',
-                component: () => import('@/resources/views/pages/Holding.vue'),
+                component: () => import('@/resources/views/pages/holding/Index'),
+            },
+            {
+                path: 'trading',
+                name: 'trading',
+                component: () => import('@/resources/views/pages/trading/Index'),
             },
             //
             {
                 path: ':pathMatch(.*)*',
-                component: () => import('@/resources/views/errors/NotFound.vue'),
+                component: () => import('@/resources/views/errors/NotFound'),
             },
         ],
     },

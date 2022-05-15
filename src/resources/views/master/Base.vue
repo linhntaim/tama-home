@@ -4,10 +4,8 @@
     .card
         .card-header
             ul.nav.nav-tabs.card-header-tabs
-                li.nav-item
-                    router-link.nav-link(:class="{active: currentRouteName === 'trading'}" :to="{name: 'trading'}") Trading
-                li.nav-item
-                    router-link.nav-link(:class="{active: currentRouteName === 'holding'}" :to="{name: 'holding'}") Holding
+                li.nav-item(v-for="item in menu")
+                    router-link.nav-link(:class="{active: currentRouteName === item.to.name}" :to="item.to") {{ item.label }}
         .card-body
             router-view
 </template>
@@ -19,6 +17,21 @@ export default {
     data() {
         return {
             appName: this.$config.app.name,
+
+            menu: [
+                {
+                    label: 'Holding',
+                    to: {
+                        name: 'holding',
+                    },
+                },
+                {
+                    label: 'Trading',
+                    to: {
+                        name: 'trading',
+                    },
+                },
+            ],
         }
     },
     computed: {
