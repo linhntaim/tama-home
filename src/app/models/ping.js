@@ -25,6 +25,11 @@ export const ping = {
                 state.expiredAt = ping.expiredAt
             }
         },
+        reset(state) {
+            state.available = false
+            state.expiredAt = 0
+            app.$cache.remove('ping')
+        },
     },
     actions: {
         async ping(context) {
