@@ -29,7 +29,13 @@ export const routes = [
             //
             {
                 path: '/',
+                name: 'root',
                 redirect: 'holding',
+            },
+            {
+                path: 'clear-site-data',
+                name: 'clear_site_data',
+                component: () => import('@/resources/views/pages/ClearSiteData'),
             },
             {
                 path: 'holding',
