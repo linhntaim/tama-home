@@ -33,6 +33,11 @@ export const routes = [
                 redirect: 'holding',
             },
             {
+                path: 'clear-site-data',
+                name: 'clear_site_data',
+                component: () => import('@/resources/views/pages/ClearSiteData'),
+            },
+            {
                 path: 'holding',
                 name: 'holding',
                 component: () => import('@/resources/views/pages/holding/Index'),
