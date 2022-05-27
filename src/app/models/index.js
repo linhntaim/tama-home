@@ -1,3 +1,6 @@
-export * from './ping'
+export * from './prerequisite'
 export * from './account'
+export * from './register'
+export * from './forgot-password'
+export * from './reset-password'
 export * from './exchange'

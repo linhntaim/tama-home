@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import {mapActions, mapGetters} from 'vuex'
+
 export default {
     // eslint-disable-next-line
     name: 'Base',
@@ -35,8 +37,19 @@ export default {
         }
     },
     computed: {
+        ...mapGetters({
+            accountIsLoggedIn: 'account/isLoggedIn',
+        }),
         currentRouteName() {
             return this.$route.name
+        },
+    },
+    methods: {
+        ...mapActions({
+            accountLogout: 'account/sanctumLogout',
+        }),
+        onLogoutClick() {
+            this.accountLogout().then(() => this.$router.push({name: 'root'}))
         },
     },
 }

@@ -11,11 +11,7 @@ import {mapMutations} from 'vuex'
 export default {
     name: 'ConnectionLost',
     methods: {
-        ...mapMutations({
-            pingReset: 'ping/reset',
-        }),
         onRefreshClick() {
-            this.pingReset()
             this.$router.push({name: 'root'})
         },
     },
