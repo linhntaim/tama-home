@@ -1,6 +1,5 @@
 <template lang="pug">
-i.fas.fa-circle-notch.fa-spin.fa-sm.me-2(v-if="loading._")
-protected-formatted-number(:value="asset.price" :fractionDigits="-1" :protected="protected")
+protected-formatted-number(:class="{'opacity-50': loading._}" :value="asset.price" :fractionDigits="-1" :protected="protected")
 </template>
 
 <script>
@@ -33,7 +32,6 @@ export default {
         }
     },
     beforeUnmount() {
-        console.log('clear fetching')
         this.clearFetchPrice()
     },
     mounted() {

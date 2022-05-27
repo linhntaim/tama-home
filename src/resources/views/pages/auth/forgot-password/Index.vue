@@ -1,13 +1,15 @@
 <template lang="pug">
 .forgot-password
-    h1 Forgot Password
-    form(@submit.prevent="onSubmit")
-        div
-            input(v-model="email" type="email" name="email" placeholder="Email" required)
-        template(v-if="error.validation.email")
-            div(v-for="message in error.validation.email")
-                small {{ message }}
-        button(:disabled="loading._" type="submit") Submit
+    h2.mb-3 Forgot Password
+    form.row(@submit.prevent="onSubmit")
+        .col-md-6.col-lg-4.col-xl-3.mx-auto
+            .mb-3
+                input.form-control(:class="{'is-invalid': !!error.validation.email}" v-model="email" type="email" name="email" placeholder="Email" required)
+                .invalid-feedback.text-start(v-if="error.validation.email")
+                    template(v-for="message in error.validation.email")
+                        | {{ message }}
+                        br
+            button.btn.btn-primary(:disabled="loading._" type="submit") Submit
 </template>
 
 <script>

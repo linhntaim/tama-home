@@ -25,9 +25,4 @@ export class StorageCache extends Cache
         this.storage.remove(key)
         return this
     }
-
-    remove(key) {
-        this.storage.remove(key)
-        return this
-    }
 }

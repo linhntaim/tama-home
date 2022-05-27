@@ -1,25 +1,29 @@
 <template lang="pug">
 .register
-    h1 Register
-    form(@submit.prevent="onSubmit")
-        div
-            input(v-model="name" type="text" name="name" placeholder="Name" required)
-        template(v-if="error.validation.name")
-            div(v-for="message in error.validation.name")
-                small {{ message }}
-        div
-            input(v-model="email" type="email" name="email" placeholder="Email" required)
-        template(v-if="error.validation.email")
-            div(v-for="message in error.validation.email")
-                small {{ message }}
-        div
-            input(v-model="password" type="password" name="password" placeholder="Password" required)
-        template(v-if="error.validation.password")
-            div(v-for="message in error.validation.password")
-                small {{ message }}
-        div
-            input(v-model="passwordConfirmation" type="password" name="password_confirmation" placeholder="Password Confirmation" required)
-        button(:disabled="loading._" type="submit") Submit
+    h2.mb-3 Register
+    form.row(@submit.prevent="onSubmit")
+        .col-md-6.col-lg-4.col-xl-3.mx-auto
+            .mb-3
+                input.form-control(:class="{'is-invalid': !!error.validation.name}" v-model="name" type="text" name="name" placeholder="Name" required)
+                .invalid-feedback.text-start(v-if="error.validation.name")
+                    template(v-for="message in error.validation.name")
+                        | {{ message }}
+                        br
+            .mb-3
+                input.form-control(:class="{'is-invalid': !!error.validation.email}" v-model="email" type="email" name="email" placeholder="Email" required)
+                .invalid-feedback.text-start(v-if="error.validation.email")
+                    template(v-for="message in error.validation.email")
+                        | {{ message }}
+                        br
+            .mb-3
+                input.form-control(:class="{'is-invalid': !!error.validation.password}" v-model="password" type="password" name="password" placeholder="Password" required)
+                .invalid-feedback.text-start(v-if="error.validation.password")
+                    template(v-for="message in error.validation.password")
+                        | {{ message }}
+                        br
+            .mb-3
+                input.form-control(v-model="passwordConfirmation" type="password" name="password_confirmation" placeholder="Password Confirmation" required)
+            button.btn.btn-primary(:disabled="loading._" type="submit") Submit
 </template>
 
 <script>

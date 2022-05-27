@@ -1,16 +1,22 @@
 <template lang="pug">
-.register
-    h1 Login
-    form(@submit.prevent="onSubmit")
-        div
-            input(v-model="email" type="email" name="email" placeholder="Email" required)
-        div
-            input(v-model="password" type="password" name="password" placeholder="Password" required)
-        button(:disabled="loading._" type="submit") Submit
+.login.text-center
+    h2.mb-3 Login
+    form.row(@submit.prevent="onSubmit")
+        .col-md-6.col-lg-4.col-xl-3.mx-auto
+            .mb-3
+                input.form-control(:class="{'is-invalid': !!error.validation.email}" v-model="email" type="email" name="email" placeholder="Email" required)
+                .invalid-feedback.text-start(v-if="error.validation.email")
+                    template(v-for="message in error.validation.email")
+                        | {{ message }}
+                        br
+            .mb-3
+                input.form-control(v-model="password" type="password" name="password" placeholder="Password" required)
+            button.btn.btn-primary(:disabled="loading._" type="submit") Submit
 </template>
 
 <script>
 import {mapActions, mapGetters} from 'vuex'
+import {StarterServiceError} from '@/app/support/services'
 
 export default {
     // eslint-disable-next-line
@@ -23,6 +29,11 @@ export default {
 
             email: '',
             password: '',
+
+            error: {
+                messages: [],
+                validation: {},
+            },
         }
     },
     computed: {
@@ -45,7 +56,12 @@ export default {
                     this.$router.push({name: 'root'})
                 }
                 else {
-                    console.log(data)
+                    if (data instanceof StarterServiceError) {
+                        this.error.messages = data.messages
+                        if (data.data && 'validation' in data.data) {
+                            this.error.validation = data.data.validation
+                        }
+                    }
                 }
             })
         },

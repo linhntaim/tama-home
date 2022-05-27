@@ -14,6 +14,11 @@ export const routes = [
         },
         children: [
             {
+                path: 'clear-site-data',
+                name: 'clear_site_data',
+                component: () => import('@/resources/views/pages/ClearSiteData'),
+            },
+            {
                 path: 'error',
                 component: BaseError,
                 children: [
@@ -35,20 +40,9 @@ export const routes = [
                 ],
             },
             {
-                path: 'clear-site-data',
-                name: 'clear_site_data',
-                component: () => import('@/resources/views/pages/ClearSiteData'),
-            },
-            //
-            {
                 path: '/',
                 name: 'root',
-                component: () => import('@/resources/views/pages/Home'),
-            },
-            {
-                path: 'about',
-                name: 'about',
-                component: () => import('@/resources/views/pages/About'),
+                redirect: 'holding',
             },
             {
                 path: 'auth',
@@ -129,16 +123,6 @@ export const routes = [
                 ],
             },
             //
-            {
-                path: '/',
-                name: 'root',
-                redirect: 'holding',
-            },
-            {
-                path: 'clear-site-data',
-                name: 'clear_site_data',
-                component: () => import('@/resources/views/pages/ClearSiteData'),
-            },
             {
                 path: 'holding',
                 name: 'holding',

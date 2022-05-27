@@ -4,7 +4,7 @@ add-form.mb-3(v-if="adding" @add="onAdd")
     table.table.align-middle
         thead
             tr
-                th.text-center(colspan="4")
+                th.text-nowrap.text-center(colspan="4")
                     .btn-group(role="group" aria-label="Actions")
                         button.btn.btn-sm.border-0(type="button" @click="onAddClick" title="Add" data-bs-toggle="tooltip")
                             i.fas.fa-plus-circle
@@ -14,14 +14,14 @@ add-form.mb-3(v-if="adding" @add="onAdd")
                             i.fas.fa-file-export
                         button.btn.btn-sm.border-0(type="button" @click="onImportClick" title="Import" data-bs-toggle="tooltip")
                             i.fas.fa-file-import
-                th.text-end
+                th.text-nowrap.text-end
                     span.text-primary Initial (USD)
-                th.text-end
+                th.text-nowrap.text-end
                     span(
                         :class="{'text-danger': profit < 0, 'text-success': profit > 0, 'text-light': profit === 0}"
                         @click="onProfitClick"
                     ) Profit (USD)
-                th.text-end
+                th.text-nowrap.text-end
                     span.text-info Current (USD)
         tbody
             tr
@@ -44,15 +44,15 @@ add-form.mb-3(v-if="adding" @add="onAdd")
                     protected-formatted-number.text-info(:value="current" :protected="protected")
         thead
             tr
-                th.text-center #
-                th
-                th Coin/Token
-                th.text-end.column-numeric Price (USD)
-                th.text-end.column-numeric Amount
-                th.text-end.column-numeric(@click="onCurrentSortClick")
+                th.text-nowrap.text-center #
+                th.text-nowrap
+                th.text-nowrap Coin/Token
+                th.text-nowrap.text-end.w180 Price (USD)
+                th.text-nowrap.text-end.w180 Amount
+                th.text-nowrap.text-end.w180(@click="onCurrentSortClick")
                     | Current (USD)
                     i.fas.ms-2(:class="{'fa-sort text-light': sortCurrent === 0, 'fa-sort-up': sortCurrent === 1, 'fa-sort-down': sortCurrent === 2}")
-                th.text-end.column-numeric % Current
+                th.text-nowrap.text-end.w180 % Current
         tbody
             tr(v-for="(asset, index) in assets")
                 td.text-center {{ index + 1 }}
@@ -74,7 +74,7 @@ add-form.mb-3(v-if="adding" @add="onAdd")
                     protected-formatted-number-input(
                         v-model="asset.amount"
                         :fractionDigits="-1"
-                        inputClass="outline-0 border-0 width-100 text-end"
+                        inputClass="outline-0 border-0 w-100 h-100 text-end"
                         :protected="protected"
                     )
                 td.text-end
@@ -148,22 +148,22 @@ export default {
         //     this.updateTitle()
         // },
     },
-    mounted() {
-        this.protectionFromCache()
-        this.dataFromCache()
+    async mounted() {
+        await this.protectionFromCache()
+        await this.dataFromCache()
     },
     methods: {
-        protectionToCache() {
-            this.$cache.set('holding.protected', this.protected)
+        async protectionToCache() {
+            await this.$cache.set('holding.protected', this.protected)
         },
-        protectionFromCache() {
-            this.protected = this.$cache.get('holding.protected', true)
+        async protectionFromCache() {
+            this.protected = await this.$cache.get('holding.protected', true)
         },
-        dataToCache() {
-            this.$cache.set('holding.data', this.storingData)
+        async dataToCache() {
+            await this.$cache.set('holding.data', this.storingData)
         },
-        dataFromCache() {
-            this.dataFrom(this.$cache.get('holding.data', {}))
+        async dataFromCache() {
+            this.dataFrom(await this.$cache.get('holding.data', {}))
         },
         dataFrom(data) {
             if ('initial' in data) {

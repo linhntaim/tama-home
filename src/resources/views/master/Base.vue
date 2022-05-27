@@ -4,8 +4,10 @@
     .card
         .card-header
             ul.nav.nav-tabs.card-header-tabs
-                li.nav-item(v-for="item in menu")
+                li.nav-item(v-for="item in menuItems")
                     router-link.nav-link(:class="{active: currentRouteName === item.to.name}" :to="item.to") {{ item.label }}
+                li.nav-item(v-if="accountIsLoggedIn")
+                    a.nav-link(@click.prevent="onLogoutClick" href="#") Logout
         .card-body
             router-view
 </template>
@@ -42,6 +44,48 @@ export default {
         }),
         currentRouteName() {
             return this.$route.name
+        },
+        menuItems() {
+            const items = [
+                {
+                    label: 'Holding',
+                    to: {
+                        name: 'holding',
+                    },
+                },
+                {
+                    label: 'Trading',
+                    to: {
+                        name: 'trading',
+                    },
+                },
+            ]
+            if (this.accountIsLoggedIn) {
+                // items.push()
+            }
+            else {
+                items.push(
+                    {
+                        label: 'Login',
+                        to: {
+                            name: 'login',
+                        },
+                    },
+                    {
+                        label: 'Register',
+                        to: {
+                            name: 'register',
+                        },
+                    },
+                    {
+                        label: 'Forgot Password',
+                        to: {
+                            name: 'password.request',
+                        },
+                    },
+                )
+            }
+            return items
         },
     },
     methods: {
