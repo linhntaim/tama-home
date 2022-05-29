@@ -1,15 +1,17 @@
 <template lang="pug">
 .reset-password
-    h1 Reset Password
+    h2.mb-3 Reset Password
     form(@submit.prevent="onSubmit")
-        div
-            input(v-model="password" type="password" name="password" placeholder="Password" required)
-        template(v-if="error.validation.password")
-            div(v-for="message in error.validation.password")
-                small {{ message }}
-        div
-            input(v-model="passwordConfirmation" type="password" name="password_confirmation" placeholder="Password Confirmation" required)
-        button(:disabled="loading._" type="submit") Submit
+        .col-md-6.col-lg-4.col-xl-3.mx-auto
+            .mb-3
+                input.form-control(:class="{'is-invalid': !!error.validation.password}" v-model="password" type="password" name="password" placeholder="Password" required)
+                .invalid-feedback.text-start(v-if="error.validation.password")
+                    template(v-for="message in error.validation.password")
+                        | {{ message }}
+                        br
+            .mb-3
+                input.form-control(v-model="passwordConfirmation" type="password" name="password_confirmation" placeholder="Password Confirmation" required)
+            button.btn.btn-primary(:disabled="loading._" type="submit") Submit
 </template>
 
 <script>

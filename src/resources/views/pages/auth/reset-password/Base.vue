@@ -1,5 +1,5 @@
 <template lang="pug">
-router-view
+router-view.text-center
 </template>
 
 <script>

@@ -286,8 +286,6 @@ export default {
         onPriceUpdate(asset, index, $event) {
             this.assets[index].chartUrl = $event.chartUrl
             this.assets[index].price = $event.price
-
-            this.onUpdate()
         },
         onUpdate() {
             this.dataToCache()
