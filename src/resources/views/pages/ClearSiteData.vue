@@ -1,6 +1,6 @@
 <template lang="pug">
 .text-center
-    h2 Clear all site's data
+    h2 Clear site data
     p Including session storage, local storage and cookies.
     button.btn.btn-danger(type="button" @click="onClearClick") Clear
     pre.my-3(v-if="logs.length")

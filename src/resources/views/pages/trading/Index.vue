@@ -82,16 +82,16 @@ export default {
         }),
         getAllExchanges() {
             this.loading._ = true
-            this.exchangeAll().then(() => {
+            this.exchangeAll().then(async () => {
                 this.exchange = this.exchanges.length ? this.exchanges[0].id : null
                 this.loading._ = false
-                this.onExchangeChange()
+                await this.onExchangeChange()
                 this.onIndicatorChange()
             })
         },
-        onExchangeChange() {
+        async onExchangeChange() {
             if (this.exchange) {
-                const exchange = this.$cache.get(this.exchangeCacheKey)
+                const exchange = await this.$cache.get(this.exchangeCacheKey)
                 if (exchange) {
                     this.tickers = exchange.tickers
                     this.ticker = exchange.defaultTicker
