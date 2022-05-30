@@ -42,7 +42,7 @@ export const routes = [
             {
                 path: '/',
                 name: 'root',
-                redirect: 'holding',
+                redirect: {name: 'holding'},
             },
             {
                 path: 'auth',

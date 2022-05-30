@@ -88,6 +88,7 @@ import AddForm from './AddForm'
 import Price from './Price'
 import ProtectedFormattedNumber from './ProtectedFormattedNumber'
 import ProtectedFormattedNumberInput from './ProtectedFormattedNumberInput'
+import {mapActions, mapGetters} from 'vuex'
 
 export default {
     // eslint-disable-next-line
@@ -106,10 +107,15 @@ export default {
             sortCurrent: 0, // desc
 
             initial: 0,
+            initialCanUpdate: true,
             assets: [],
         }
     },
     computed: {
+        ...mapGetters({
+            holding: 'holding/holding',
+            holdingForStore: 'holding/holdingForStore',
+        }),
         profit() {
             return this.current - this.initial
         },
@@ -123,20 +129,16 @@ export default {
             })
             return current
         },
-        storingData() {
-            return {
-                initial: this.initial,
-                assets: this.assets.map(asset => ({
-                    symbol: asset.symbol,
-                    amount: asset.amount,
-                    exchange: asset.exchange,
-                })),
-            }
-        },
     },
     watch: {
-        initial() {
-            this.dataToCache()
+        initial(value, oldValue) {
+            if (this.initialCanUpdate) {
+                this.holdingUpdateInitial(value).catch(() => {
+                    this.initialCanUpdate = false
+                    this.initial = oldValue
+                })
+            }
+            this.initialCanUpdate = true
         },
         // profit() {
         //     this.updateTitle()
@@ -150,29 +152,26 @@ export default {
     },
     async mounted() {
         await this.protectionFromCache()
-        await this.dataFromCache()
+        // await this.dataFromCache()
+        this.holdingCurrent().then(() => this.fetchData())
     },
     methods: {
+        ...mapActions({
+            holdingCurrent: 'holding/current',
+            holdingRestoreFromFile: 'holding/restoreFromFile',
+            holdingUpdateInitial: 'holding/updateInitial',
+        }),
         async protectionToCache() {
             await this.$cache.set('holding.protected', this.protected)
         },
         async protectionFromCache() {
             this.protected = await this.$cache.get('holding.protected', true)
         },
-        async dataToCache() {
-            await this.$cache.set('holding.data', this.storingData)
-        },
-        async dataFromCache() {
-            this.dataFrom(await this.$cache.get('holding.data', {}))
-        },
-        dataFrom(data) {
-            if ('initial' in data) {
-                this.initial = data.initial
-            }
-            if ('assets' in data) {
-                this.assets = []
-                this.$nextTick(() => data.assets.forEach(asset => this.add(asset)))
-            }
+        fetchData() {
+            this.initialCanUpdate = false
+            this.initial = this.holding.initial
+            this.assets = []
+            this.$nextTick(() => this.holding.assets.forEach(asset => this.add(asset)))
         },
         add(asset) {
             this.assets.push({
@@ -197,7 +196,7 @@ export default {
         },
         onExportClick() {
             const filename = 'crypto-holding.json'
-            const file = new Blob([JSON.stringify(this.storingData)], {type: 'application/json;charset=utf-8'})
+            const file = new Blob([JSON.stringify(this.holdingForStore)], {type: 'application/json;charset=utf-8'})
             if (window.navigator.msSaveOrOpenBlob) { // IE10+
                 window.navigator.msSaveOrOpenBlob(file, filename)
             }
@@ -225,20 +224,14 @@ export default {
                 input.style.display = 'none'
                 input.onchange = e => {
                     if (e.target.files.length) {
-                        const file = e.target.files[0]
-                        if (file.type === 'application/json') {
-                            const reader = new FileReader()
-                            reader.addEventListener('load', e => {
-                                this.dataFrom(
-                                    JSON.parse(
-                                        atob(e.target.result.substr('data:application/json;base64,'.length)),
-                                    ),
-                                )
-                            })
-                            reader.readAsDataURL(file)
-                        }
+                        this.holdingRestoreFromFile(e.target.files[0]).then(() => {
+                            this.fetchData()
+                            input.value = ''
+                        })
                     }
-                    input.value = ''
+                    else {
+                        input.value = ''
+                    }
                 }
                 document.body.appendChild(input)
             }
@@ -288,7 +281,7 @@ export default {
             this.assets[index].price = $event.price
         },
         onUpdate() {
-            this.dataToCache()
+            //this.dataToCache()
         },
     },
 }
