@@ -100,4 +100,10 @@ export class StarterService extends Service
             this.requester().post(url, params),
         )
     }
+
+    delete(url, params = {}) {
+        return this.response(
+            this.requester().delete(url, {data: params}),
+        )
+    }
 }

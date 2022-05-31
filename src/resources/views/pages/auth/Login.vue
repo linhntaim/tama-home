@@ -16,7 +16,6 @@
 
 <script>
 import {mapActions, mapGetters} from 'vuex'
-import {StarterServiceError} from '@/app/support/services'
 
 export default {
     // eslint-disable-next-line
@@ -50,18 +49,16 @@ export default {
             this.accountLogin({
                 email: this.email,
                 password: this.password,
-            }).then(data => {
+            }).then(() => {
                 this.loading._ = false
                 if (this.accountIsLoggedIn) {
                     this.$router.push({name: 'root'})
                 }
-                else {
-                    if (data instanceof StarterServiceError) {
-                        this.error.messages = data.messages
-                        if (data.data && 'validation' in data.data) {
-                            this.error.validation = data.data.validation
-                        }
-                    }
+            }).catch(err => {
+                this.loading._ = false
+                this.error.messages = err.messages
+                if (err.data && 'validation' in err.data) {
+                    this.error.validation = err.data.validation
                 }
             })
         },

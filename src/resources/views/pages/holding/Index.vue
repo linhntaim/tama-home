@@ -105,10 +105,6 @@ export default {
             protected: true,
             unprotectedProfit: !!this.$route.query.unprotected_profit,
             sortCurrent: 0, // desc
-
-            initial: 0,
-            initialCanUpdate: true,
-            assets: [],
         }
     },
     computed: {
@@ -116,6 +112,19 @@ export default {
             holding: 'holding/holding',
             holdingForStore: 'holding/holdingForStore',
         }),
+        initial: {
+            set(value) {
+                this.holdingUpdateInitial(value)
+            },
+            get() {
+                return this.$store.state.holding.initial
+            },
+        },
+        assets: {
+            get() {
+                return this.$store.state.holding.assets
+            },
+        },
         profit() {
             return this.current - this.initial
         },
@@ -131,15 +140,6 @@ export default {
         },
     },
     watch: {
-        initial(value, oldValue) {
-            if (this.initialCanUpdate) {
-                this.holdingUpdateInitial(value).catch(() => {
-                    this.initialCanUpdate = false
-                    this.initial = oldValue
-                })
-            }
-            this.initialCanUpdate = true
-        },
         // profit() {
         //     this.updateTitle()
         // },
@@ -150,16 +150,21 @@ export default {
         //     this.updateTitle()
         // },
     },
+    beforeUnmount() {
+        this.holdingReset()
+    },
     async mounted() {
         await this.protectionFromCache()
-        // await this.dataFromCache()
-        this.holdingCurrent().then(() => this.fetchData())
+        await this.holdingCurrent()
     },
     methods: {
         ...mapActions({
             holdingCurrent: 'holding/current',
-            holdingRestoreFromFile: 'holding/restoreFromFile',
+            holdingImport: 'holding/import',
             holdingUpdateInitial: 'holding/updateInitial',
+            holdingAddAsset: 'holding/addAsset',
+            holdingRemoveAsset: 'holding/removeAsset',
+            holdingReset: 'holding/reset',
         }),
         async protectionToCache() {
             await this.$cache.set('holding.protected', this.protected)
@@ -167,24 +172,8 @@ export default {
         async protectionFromCache() {
             this.protected = await this.$cache.get('holding.protected', true)
         },
-        fetchData() {
-            this.initialCanUpdate = false
-            this.initial = this.holding.initial
-            this.assets = []
-            this.$nextTick(() => this.holding.assets.forEach(asset => this.add(asset)))
-        },
-        add(asset) {
-            this.assets.push({
-                symbol: asset.symbol,
-                amount: asset.amount,
-                exchange: asset.exchange,
-                chartUrl: null,
-                price: 0,
-            })
-        },
         onAdd(asset) {
-            this.add(asset)
-            this.onUpdate()
+            this.holdingAddAsset(asset)
             this.onAddClick()
         },
         onAddClick() {
@@ -224,8 +213,7 @@ export default {
                 input.style.display = 'none'
                 input.onchange = e => {
                     if (e.target.files.length) {
-                        this.holdingRestoreFromFile(e.target.files[0]).then(() => {
-                            this.fetchData()
+                        this.holdingImport(e.target.files[0]).then(() => {
                             input.value = ''
                         })
                     }
@@ -262,9 +250,8 @@ export default {
             }
             this.onUpdate()
         },
-        onDeleteClick(asset, index) {
-            this.assets.splice(index, 1)
-            this.onUpdate()
+        onDeleteClick(asset) {
+            this.holdingRemoveAsset(asset)
         },
         onMoveUpClick(asset, index) {
             this.assets.splice(index - 1, 0, this.assets.splice(index, 1)[0])
