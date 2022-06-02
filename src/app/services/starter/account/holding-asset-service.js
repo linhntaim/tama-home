@@ -13,4 +13,11 @@ export class HoldingAssetService extends StarterService
     remove(id) {
         return this.delete(`account/holding/asset/${id}`)
     }
+
+    updateOrders(assets) {
+        return this.post('account/holding/asset', {
+            _orders: 1,
+            assets,
+        })
+    }
 }

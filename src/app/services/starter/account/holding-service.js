@@ -6,6 +6,10 @@ export class HoldingService extends StarterService
         return this.get('account/holding/current')
     }
 
+    save(initial, assets) {
+        return this.post('account/holding/current', {initial, assets})
+    }
+
     updateInitial(initial) {
         return this.post('account/holding/current', {initial})
     }

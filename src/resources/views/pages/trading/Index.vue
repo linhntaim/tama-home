@@ -30,8 +30,8 @@ form.row.row-cols-lg-auto.g-3.align-items-center(@submit.prevent="onSubmit" meth
 <script>
 import {defineAsyncComponent} from 'vue'
 import {ucfirst} from 'locutus/php/strings'
-import {ExchangeService} from '@/app/services/exchange-service'
-import {SwingTradeService} from '@/app/services/swing-trade-service'
+import {ExchangeService} from '@/app/services/starter/exchange-service'
+import {SwingTradeService} from '@/app/services/starter/swing-trade-service'
 import {mapActions, mapGetters} from 'vuex'
 
 const INDICATORS = [
