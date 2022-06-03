@@ -1,5 +1,5 @@
 import {app} from '@/bootstrap/app'
-import {ExchangeService} from '@/app/services/exchange-service'
+import {ExchangeService} from '@/app/services/starter/exchange-service'
 
 export const exchange = {
     namespaced: true,
