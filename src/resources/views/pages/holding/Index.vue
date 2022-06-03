@@ -58,11 +58,11 @@ add-form.mb-3(v-if="adding" @add="onAdd")
                 td.text-center {{ index + 1 }}
                 td.text-center.text-nowrap
                     .btn-group(role="group" aria-label="Item actions")
-                        button.btn.btn-sm.border-0(@click="onDeleteClick(asset, index)")
+                        button.btn.btn-sm.border-0(:disabled="loading._" @click="onDeleteClick(asset, index)")
                             i.fas.fa-times
-                        button.btn.btn-sm.border-0(:disabled="index === 0" @click="onMoveUpClick(asset, index)")
+                        button.btn.btn-sm.border-0(:disabled="loading._ || index === 0" @click="onMoveUpClick(asset, index)")
                             i.fas.fa-arrow-up
-                        button.btn.btn-sm.border-0(:disabled="index === assets.length - 1" @click="onMoveDownClick(asset, index)")
+                        button.btn.btn-sm.border-0(:disabled="loading._ || index === assets.length - 1" @click="onMoveDownClick(asset, index)")
                             i.fas.fa-arrow-down
                 th
                     a.btn.btn-link.btn-sm(:class="{disabled: !asset.chartUrl}" :href="asset.chartUrl ? asset.chartUrl : '#'" target="_blank")
@@ -88,6 +88,7 @@ import AddForm from './AddForm'
 import Price from './Price'
 import ProtectedFormattedNumber from './ProtectedFormattedNumber'
 import ProtectedFormattedNumberInput from './ProtectedFormattedNumberInput'
+import {mapActions, mapGetters, mapMutations} from 'vuex'
 
 export default {
     // eslint-disable-next-line
@@ -103,13 +104,28 @@ export default {
 
             protected: true,
             unprotectedProfit: !!this.$route.query.unprotected_profit,
-            sortCurrent: 0, // desc
-
-            initial: 0,
-            assets: [],
+            sortCurrent: 0,
         }
     },
     computed: {
+        ...mapGetters({
+            accountIsLoggedIn: 'account/isLoggedIn',
+            holding: 'holding/holding',
+            holdingForStore: 'holding/holdingForStore',
+        }),
+        initial: {
+            set(value) {
+                this.holdingUpdateInitial(value)
+            },
+            get() {
+                return this.$store.state.holding.initial
+            },
+        },
+        assets: {
+            get() {
+                return this.$store.state.holding.assets
+            },
+        },
         profit() {
             return this.current - this.initial
         },
@@ -123,20 +139,11 @@ export default {
             })
             return current
         },
-        storingData() {
-            return {
-                initial: this.initial,
-                assets: this.assets.map(asset => ({
-                    symbol: asset.symbol,
-                    amount: asset.amount,
-                    exchange: asset.exchange,
-                })),
-            }
-        },
     },
     watch: {
-        initial() {
-            this.dataToCache()
+        accountIsLoggedIn() {
+            this.reset()
+            this.init()
         },
         // profit() {
         //     this.updateTitle()
@@ -148,45 +155,51 @@ export default {
         //     this.updateTitle()
         // },
     },
-    async mounted() {
-        await this.protectionFromCache()
-        await this.dataFromCache()
+    beforeUnmount() {
+        this.reset()
+    },
+    mounted() {
+        this.init()
     },
     methods: {
+        ...mapMutations({
+            holdingUpdateAssetPrice: 'holding/updateAssetPrice',
+        }),
+        ...mapActions({
+            holdingCurrent: 'holding/current',
+            holdingImport: 'holding/import',
+            holdingUpdateInitial: 'holding/updateInitial',
+            holdingAddAsset: 'holding/addAsset',
+            holdingRemoveAsset: 'holding/removeAsset',
+            holdingMoveUpAsset: 'holding/moveUpAsset',
+            holdingMoveDownAsset: 'holding/moveDownAsset',
+            holdingSortAssetBySymbol: 'holding/sortAssetBySymbol',
+            holdingSortAssetByPriceTotal: 'holding/sortAssetByPriceTotal',
+            holdingReset: 'holding/reset',
+        }),
+        reset() {
+            this.protected = true
+            this.sortCurrent = 0
+            this.holdingReset()
+        },
+        async init() {
+            await this.protectionFromCache()
+            await this.holdingCurrent()
+        },
         async protectionToCache() {
             await this.$cache.set('holding.protected', this.protected)
         },
         async protectionFromCache() {
             this.protected = await this.$cache.get('holding.protected', true)
         },
-        async dataToCache() {
-            await this.$cache.set('holding.data', this.storingData)
-        },
-        async dataFromCache() {
-            this.dataFrom(await this.$cache.get('holding.data', {}))
-        },
-        dataFrom(data) {
-            if ('initial' in data) {
-                this.initial = data.initial
-            }
-            if ('assets' in data) {
-                this.assets = []
-                this.$nextTick(() => data.assets.forEach(asset => this.add(asset)))
-            }
-        },
-        add(asset) {
-            this.assets.push({
-                symbol: asset.symbol,
-                amount: asset.amount,
-                exchange: asset.exchange,
-                chartUrl: null,
-                price: 0,
-            })
-        },
         onAdd(asset) {
-            this.add(asset)
-            this.onUpdate()
-            this.onAddClick()
+            this.loading._ = true
+            this.holdingAddAsset(asset)
+                .then(() => {
+                    this.onAddClick()
+                    this.loading._ = false
+                })
+                .catch(() => this.loading._ = false)
         },
         onAddClick() {
             this.adding = !this.adding
@@ -197,7 +210,7 @@ export default {
         },
         onExportClick() {
             const filename = 'crypto-holding.json'
-            const file = new Blob([JSON.stringify(this.storingData)], {type: 'application/json;charset=utf-8'})
+            const file = new Blob([JSON.stringify(this.holdingForStore)], {type: 'application/json;charset=utf-8'})
             if (window.navigator.msSaveOrOpenBlob) { // IE10+
                 window.navigator.msSaveOrOpenBlob(file, filename)
             }
@@ -217,6 +230,7 @@ export default {
             }
         },
         onImportClick() {
+            this.loading._ = true
             let input = document.getElementById('inputFileImport')
             if (!input) {
                 input = document.createElement('input')
@@ -225,20 +239,19 @@ export default {
                 input.style.display = 'none'
                 input.onchange = e => {
                     if (e.target.files.length) {
-                        const file = e.target.files[0]
-                        if (file.type === 'application/json') {
-                            const reader = new FileReader()
-                            reader.addEventListener('load', e => {
-                                this.dataFrom(
-                                    JSON.parse(
-                                        atob(e.target.result.substr('data:application/json;base64,'.length)),
-                                    ),
-                                )
+                        this.holdingImport(e.target.files[0])
+                            .then(() => {
+                                input.value = ''
+                                this.loading._ = false
                             })
-                            reader.readAsDataURL(file)
-                        }
+                            .catch(() => {
+                                input.value = ''
+                                this.loading._ = false
+                            })
                     }
-                    input.value = ''
+                    else {
+                        input.value = ''
+                    }
                 }
                 document.body.appendChild(input)
             }
@@ -248,47 +261,53 @@ export default {
             this.unprotectedProfit = !this.unprotectedProfit
         },
         onCurrentSortClick() {
-            this.sortCurrent = (this.sortCurrent + 1) % 3
-            switch (this.sortCurrent) {
+            this.loading._ = true
+            const sortCurrent = (this.sortCurrent + 1) % 3
+            this.sortByCurrent(sortCurrent)
+                .then(() => {
+                    this.sortCurrent = sortCurrent
+                    this.loading._ = false
+                })
+                .catch(() => this.loading._ = false)
+        },
+        sortByCurrent(sortCurrent) {
+            switch (sortCurrent) {
                 case 1:
-                    this.assets = this.assets.sort((asset1, assets2) => {
-                        return asset1.price * asset1.amount - assets2.price * assets2.amount
-                    })
-                    break
+                    return this.holdingSortAssetByPriceTotal()
                 case 2:
-                    this.assets = this.assets.sort((asset1, assets2) => {
-                        return assets2.price * assets2.amount - asset1.price * asset1.amount
-                    })
-                    break
+                    return this.holdingSortAssetByPriceTotal(false)
                 default:
-                    this.assets = this.assets.sort((asset1, assets2) => {
-                        return asset1.symbol < assets2.symbol ?
-                            -1 : (asset1.symbol > assets2.symbol ? 1 : 0)
-                    })
-                    break
+                    return this.holdingSortAssetBySymbol()
             }
-            this.onUpdate()
         },
         onDeleteClick(asset, index) {
-            this.assets.splice(index, 1)
-            this.onUpdate()
+            this.loading._ = true
+            this.holdingRemoveAsset({asset, index})
+                .then(() => this.loading._ = false)
+                .catch(() => this.loading._ = false)
         },
         onMoveUpClick(asset, index) {
-            this.assets.splice(index - 1, 0, this.assets.splice(index, 1)[0])
-            this.sortCurrent = 0
-            this.onUpdate()
+            this.holdingMoveUpAsset({asset, index})
+                .then(() => {
+                    this.sortCurrent = 0
+                    this.loading._ = false
+                })
+                .catch(() => this.loading._ = false)
         },
         onMoveDownClick(asset, index) {
-            this.assets.splice(index + 1, 0, this.assets.splice(index, 1)[0])
-            this.sortCurrent = 0
-            this.onUpdate()
+            this.holdingMoveDownAsset({asset, index})
+                .then(() => {
+                    this.sortCurrent = 0
+                    this.loading._ = false
+                })
+                .catch(() => this.loading._ = false)
         },
         onPriceUpdate(asset, index, $event) {
-            this.assets[index].chartUrl = $event.chartUrl
-            this.assets[index].price = $event.price
-        },
-        onUpdate() {
-            this.dataToCache()
+            this.holdingUpdateAssetPrice({
+                index,
+                price: $event.price,
+                chartUrl: $event.chartUrl,
+            })
         },
     },
 }

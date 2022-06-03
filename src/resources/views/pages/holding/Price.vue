@@ -1,10 +1,10 @@
 <template lang="pug">
-protected-formatted-number(:class="{'opacity-50': loading._}" :value="asset.price" :fractionDigits="-1" :protected="protected")
+protected-formatted-number(:class="{'opacity-50': loading._ && !protected}" :value="asset.price" :fractionDigits="-1" :protected="protected")
 </template>
 
 <script>
 import {app} from '@/bootstrap/app'
-import {ExchangeService} from '@/app/services/exchange-service'
+import {ExchangeService} from '@/app/services/starter/exchange-service'
 import ProtectedFormattedNumber from './ProtectedFormattedNumber'
 
 export default {

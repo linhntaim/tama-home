@@ -28,7 +28,7 @@ export default {
             },
 
             symbol: '',
-            amount: '0.00000000',
+            amount: '0.000000000000000000',
             exchange: null,
         }
     },
@@ -59,7 +59,7 @@ export default {
             })
 
             this.symbol = ''
-            this.amount = '0.00000000'
+            this.amount = '0.000000000000000000'
             this.exchange = this.exchanges.length ? this.exchanges[0].id : null
         },
     },
