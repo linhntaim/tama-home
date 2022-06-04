@@ -13,14 +13,24 @@ export const holding = {
             state.initial = initial
         },
         setAssets(state, assets) {
-            state.assets = assets.map(asset => ({
-                id: 'id' in asset ? asset.id : 0,
-                exchange: asset.exchange,
-                symbol: asset.symbol,
-                amount: asset.amount,
-                price: 0,
-                chartUrl: null,
-            }))
+            const createKey = asset => asset.exchange + '.' + asset.symbol
+            const old = {}
+            state.assets.forEach(asset => old[createKey(asset)] = {
+                price: asset.price,
+                chartUrl: asset.chartUrl,
+            })
+            state.assets = assets.map(asset => {
+                const key = createKey(asset)
+                const hasOld = key in old
+                return {
+                    id: 'id' in asset ? asset.id : 0,
+                    exchange: asset.exchange,
+                    symbol: asset.symbol,
+                    amount: asset.amount,
+                    price: hasOld ? old[key].price : 0,
+                    chartUrl: hasOld ? old[key].chartUrl : null,
+                }
+            })
         },
         updateAssetPrice(state, {index, price, chartUrl}) {
             state.assets[index].price = price
@@ -143,6 +153,24 @@ export const holding = {
             return app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceRemoveAsset', {asset})
                 : context.dispatch('cacheRemoveAsset', {index})
+        },
+        cacheUpdateAssetAmount(context, {index, amount}) {
+            if (index >= 0 && index <= context.state.assets.length - 1) {
+                const holdingForStore = context.getters.holdingForStore
+                holdingForStore.assets[index].amount = amount
+                return context.dispatch('storeToCache', holdingForStore).then(() => context.dispatch('cacheCurrent'))
+            }
+            return Promise.resolve()
+        },
+        serviceUpdateAssetAmount(context, {asset, amount}) {
+            return app.$service(AccountHoldingAssetService)
+                .done(() => context.dispatch('serviceCurrent'))
+                .updateAmount(asset.id, amount)
+        },
+        updateAssetAmount(context, {asset, index, amount}) {
+            return app.$store.getters['account/isLoggedIn']
+                ? context.dispatch('serviceUpdateAssetAmount', {asset, amount})
+                : context.dispatch('cacheUpdateAssetAmount', {index, amount})
         },
         cacheMoveUpAsset(context, {index}) {
             if (index > 0) {
