@@ -72,7 +72,8 @@ add-form.mb-3(v-if="adding" @add="onAdd")
                     price(:asset="asset" :protected="protected" @update="onPriceUpdate(asset, index, $event)")
                 td.text-end
                     protected-formatted-number-input(
-                        v-model="asset.amount"
+                        :modelValue="asset.amount"
+                        @update:modelValue="onAmountUpdate(asset, index, $event)"
                         :fractionDigits="-1"
                         inputClass="outline-0 border-0 w-100 h-100 text-end"
                         :protected="protected"
@@ -84,11 +85,11 @@ add-form.mb-3(v-if="adding" @add="onAdd")
 </template>
 
 <script>
+import {mapActions, mapGetters, mapMutations} from 'vuex'
 import AddForm from './AddForm'
 import Price from './Price'
 import ProtectedFormattedNumber from './ProtectedFormattedNumber'
 import ProtectedFormattedNumberInput from './ProtectedFormattedNumberInput'
-import {mapActions, mapGetters, mapMutations} from 'vuex'
 
 export default {
     // eslint-disable-next-line
@@ -171,6 +172,7 @@ export default {
             holdingUpdateInitial: 'holding/updateInitial',
             holdingAddAsset: 'holding/addAsset',
             holdingRemoveAsset: 'holding/removeAsset',
+            holdingUpdateAssetAmount: 'holding/updateAssetAmount',
             holdingMoveUpAsset: 'holding/moveUpAsset',
             holdingMoveDownAsset: 'holding/moveDownAsset',
             holdingSortAssetBySymbol: 'holding/sortAssetBySymbol',
@@ -261,6 +263,9 @@ export default {
             this.unprotectedProfit = !this.unprotectedProfit
         },
         onCurrentSortClick() {
+            if (this.loading._) {
+                return
+            }
             this.loading._ = true
             const sortCurrent = (this.sortCurrent + 1) % 3
             this.sortByCurrent(sortCurrent)
@@ -287,6 +292,7 @@ export default {
                 .catch(() => this.loading._ = false)
         },
         onMoveUpClick(asset, index) {
+            this.loading._ = true
             this.holdingMoveUpAsset({asset, index})
                 .then(() => {
                     this.sortCurrent = 0
@@ -295,6 +301,7 @@ export default {
                 .catch(() => this.loading._ = false)
         },
         onMoveDownClick(asset, index) {
+            this.loading._ = true
             this.holdingMoveDownAsset({asset, index})
                 .then(() => {
                     this.sortCurrent = 0
@@ -308,6 +315,16 @@ export default {
                 price: $event.price,
                 chartUrl: $event.chartUrl,
             })
+        },
+        onAmountUpdate(asset, index, $event) {
+            this.loading._ = true
+            this.holdingUpdateAssetAmount({
+                    asset,
+                    index,
+                    amount: $event,
+                })
+                .then(() => this.loading._ = false)
+                .catch(() => this.loading._ = false)
         },
     },
 }

@@ -42,6 +42,9 @@ export default {
             this.timeout.handle && clearTimeout(this.timeout.handle)
         },
         fetchPrice() {
+            if (this.loading._) {
+                return
+            }
             this.loading._ = true
             app.$service(ExchangeService)
                 .done(data => {
