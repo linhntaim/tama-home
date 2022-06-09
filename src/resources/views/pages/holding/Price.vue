@@ -42,6 +42,13 @@ export default {
             this.timeout.handle && clearTimeout(this.timeout.handle)
         },
         fetchPrice() {
+            if (this.asset.symbol === 'USDT') {
+                this.$emit('update', {
+                    price: 1.00,
+                    chartUrl: null,
+                })
+                return
+            }
             if (this.loading._) {
                 return
             }
