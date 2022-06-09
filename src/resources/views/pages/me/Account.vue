@@ -1,8 +1,8 @@
 <template lang="pug">
-.account
-    h1 Account
-    div {{ account.name }}
-    div {{ account.email }}
+.account.text-center
+    h2.mb-3 Account
+    .text-black {{ account.name }}
+    .text-black-50.small {{ account.email }}
 </template>
 
 <script>

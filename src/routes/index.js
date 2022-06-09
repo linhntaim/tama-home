@@ -37,12 +37,8 @@ export const routes = [
                         name: 'not_found',
                         component: () => import('@/resources/views/errors/NotFound'),
                     },
+                    //
                 ],
-            },
-            {
-                path: '/',
-                name: 'root',
-                redirect: {name: 'holding'},
             },
             {
                 path: 'auth',
@@ -105,22 +101,13 @@ export const routes = [
                             },
                         ],
                     },
+                    //
                 ],
             },
             {
-                path: '',
-                component: BaseBlank,
-                meta: {
-                    requiresAuth: true,
-                    middleware: [Auth],
-                },
-                children: [
-                    {
-                        path: 'account',
-                        name: 'account',
-                        component: () => import('@/resources/views/pages/me/Account'),
-                    },
-                ],
+                path: '/',
+                name: 'root',
+                redirect: {name: 'holding'},
             },
             //
             {
@@ -134,6 +121,22 @@ export const routes = [
                 component: () => import('@/resources/views/pages/trading/Index'),
             },
             //
+            {
+                path: '/',
+                component: BaseBlank,
+                meta: {
+                    requiresAuth: true,
+                    middleware: [Auth],
+                },
+                children: [
+                    {
+                        path: 'account',
+                        name: 'account',
+                        component: () => import('@/resources/views/pages/me/Account'),
+                    },
+                    //
+                ],
+            },
             {
                 path: ':pathMatch(.*)*',
                 component: () => import('@/resources/views/errors/NotFound'),

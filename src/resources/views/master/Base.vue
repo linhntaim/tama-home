@@ -61,7 +61,12 @@ export default {
                 },
             ]
             if (this.accountIsLoggedIn) {
-                // items.push()
+                items.push({
+                    label: 'Account',
+                    to: {
+                        name: 'account',
+                    },
+                })
             }
             else {
                 items.push(
