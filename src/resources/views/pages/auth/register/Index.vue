@@ -16,13 +16,13 @@
                         | {{ message }}
                         br
             .mb-3
-                input.form-control(:class="{'is-invalid': !!error.validation.password}" v-model="password" type="password" name="password" placeholder="Password" required)
+                input.form-control(:class="{'is-invalid': !!error.validation.password}" v-model="password" type="password" name="password" placeholder="Password" autocomplete="off" required)
                 .invalid-feedback.text-start(v-if="error.validation.password")
                     template(v-for="message in error.validation.password")
                         | {{ message }}
                         br
             .mb-3
-                input.form-control(v-model="passwordConfirmation" type="password" name="password_confirmation" placeholder="Password Confirmation" required)
+                input.form-control(v-model="passwordConfirmation" type="password" name="password_confirmation" placeholder="Password Confirmation" autocomplete="off" required)
             button.btn.btn-primary(:disabled="loading._" type="submit") Submit
 </template>
 

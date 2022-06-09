@@ -10,7 +10,7 @@
                         | {{ message }}
                         br
             .mb-3
-                input.form-control(v-model="password" type="password" name="password" placeholder="Password" required)
+                input.form-control(v-model="password" type="password" name="password" placeholder="Password" autocomplete="off" required)
             button.btn.btn-primary(:disabled="loading._" type="submit") Submit
 </template>
 
@@ -65,7 +65,3 @@ export default {
     },
 }
 </script>
-
-<style scoped lang="sass">
-
-</style>
