@@ -62,7 +62,7 @@ export const account = {
                     accessToken: token.accessToken,
                     expiredAt: token.expiredAt,
                 })
-                await context.dispatch('current').catch(err => app.$log.info('model', 'cannot retrieve user', err))
+                await context.dispatch('current').catch(err => app.$log.debug('model', 'cannot retrieve user', err))
             }
             if (!context.getters.isLoggedIn) {
                 context.commit('unset')
