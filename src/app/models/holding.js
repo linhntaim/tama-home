@@ -42,28 +42,27 @@ export const holding = {
             context.commit('setInitial', 0)
             context.commit('setAssets', [])
         },
-        async loadData(context, data) {
-            if (app.$store.getters['account/isLoggedIn']) {
-                await app.$service(AccountHoldingService)
-                    .done(async () => await context.dispatch('serviceCurrent'))
-                    .save('initial' in data ? data.initial : 0, 'assets' in data ? data.assets : [])
-            }
-            else {
-                if ('initial' in data || 'assets' in data) {
-                    context.commit('setInitial', 'initial' in data ? data.initial : 0)
-                    context.commit('setAssets', 'assets' in data ? data.assets : [])
-                }
-            }
-            return data
-        },
         import(context, file) {
             return new Promise((resolve, reject) => {
                 if (file.type === 'application/json') {
                     const reader = new FileReader()
                     reader.addEventListener('load', async e => {
-                        const data = await context.dispatch('loadData', JSON.parse(
+                        const data = JSON.parse(
                             atob(e.target.result.substr('data:application/json;base64,'.length)),
-                        ))
+                        )
+
+                        if (app.$store.getters['account/isLoggedIn']) {
+                            await app.$service(AccountHoldingService)
+                                .done(async () => await context.dispatch('serviceCurrent'))
+                                .save('initial' in data ? data.initial : 0, 'assets' in data ? data.assets : [])
+                        }
+                        else {
+                            if ('initial' in data || 'assets' in data) {
+                                context.commit('setInitial', 'initial' in data ? data.initial : 0)
+                                context.commit('setAssets', 'assets' in data ? data.assets : [])
+                            }
+                        }
+
                         resolve(data)
                     })
                     reader.addEventListener('error', e => reject(e))
@@ -78,7 +77,13 @@ export const holding = {
             return app.$cache.set('holding.data', holdingForStore ? holdingForStore : context.getters.holdingForStore)
         },
         cacheCurrent(context) {
-            return app.$cache.get('holding.data', {}).then(async data => await context.dispatch('loadData', data))
+            return app.$cache.get('holding.data', {}).then(async data => {
+                if ('initial' in data || 'assets' in data) {
+                    context.commit('setInitial', 'initial' in data ? data.initial : 0)
+                    context.commit('setAssets', 'assets' in data ? data.assets : [])
+                }
+                return data
+            })
         },
         serviceCurrent(context) {
             return app.$service(AccountHoldingService)
