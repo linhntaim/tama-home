@@ -1,4 +1,3 @@
-import {app} from '@/bootstrap/app'
 import {HoldingService as AccountHoldingService} from '@/app/services/starter/account/holding-service'
 import {HoldingAssetService as AccountHoldingAssetService} from '@/app/services/starter/account/holding-asset-service'
 
@@ -51,8 +50,8 @@ export const holding = {
                             atob(e.target.result.substr('data:application/json;base64,'.length)),
                         )
 
-                        if (app.$store.getters['account/isLoggedIn']) {
-                            await app.$service(AccountHoldingService)
+                        if (this.app.$store.getters['account/isLoggedIn']) {
+                            await this.app.$service(AccountHoldingService)
                                 .done(async () => await context.dispatch('serviceCurrent'))
                                 .save('initial' in data ? data.initial : 0, 'assets' in data ? data.assets : [])
                         }
@@ -74,10 +73,10 @@ export const holding = {
             })
         },
         storeToCache(context, holdingForStore) {
-            return app.$cache.set('holding.data', holdingForStore ? holdingForStore : context.getters.holdingForStore)
+            return this.app.$cache.set('holding.data', holdingForStore ? holdingForStore : context.getters.holdingForStore)
         },
         cacheCurrent(context) {
-            return app.$cache.get('holding.data', {}).then(async data => {
+            return this.app.$cache.get('holding.data', {}).then(async data => {
                 if ('initial' in data || 'assets' in data) {
                     context.commit('setInitial', 'initial' in data ? data.initial : 0)
                     context.commit('setAssets', 'assets' in data ? data.assets : [])
@@ -86,7 +85,7 @@ export const holding = {
             })
         },
         serviceCurrent(context) {
-            return app.$service(AccountHoldingService)
+            return this.app.$service(AccountHoldingService)
                 .done(async data => {
                     context.commit('setInitial', data.model.initial)
                     context.commit('setAssets', data.model.assets)
@@ -97,7 +96,7 @@ export const holding = {
                 .current()
         },
         current(context) {
-            return app.$store.getters['account/isLoggedIn']
+            return this.app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceCurrent')
                 : context.dispatch('cacheCurrent')
         },
@@ -107,12 +106,12 @@ export const holding = {
             return context.dispatch('storeToCache', holdingForStore).then(() => context.commit('setInitial', initial))
         },
         serviceUpdateInitial(context, initial) {
-            return app.$service(AccountHoldingService)
+            return this.app.$service(AccountHoldingService)
                 .done(() => context.commit('setInitial', initial))
                 .updateInitial(initial)
         },
         updateInitial(context, initial) {
-            return app.$store.getters['account/isLoggedIn']
+            return this.app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceUpdateInitial', initial)
                 : context.dispatch('cacheUpdateInitial', initial)
         },
@@ -132,12 +131,12 @@ export const holding = {
             return context.dispatch('storeToCache', holdingForStore).then(() => context.dispatch('cacheCurrent'))
         },
         serviceAddAsset(context, asset) {
-            return app.$service(AccountHoldingAssetService)
+            return this.app.$service(AccountHoldingAssetService)
                 .done(() => context.dispatch('serviceCurrent'))
                 .add(asset.exchange, asset.symbol, asset.amount)
         },
         addAsset(context, asset) {
-            return app.$store.getters['account/isLoggedIn']
+            return this.app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceAddAsset', asset)
                 : context.dispatch('cacheAddAsset', asset)
         },
@@ -150,12 +149,12 @@ export const holding = {
             return Promise.resolve()
         },
         serviceRemoveAsset(context, {asset}) {
-            return app.$service(AccountHoldingAssetService)
+            return this.app.$service(AccountHoldingAssetService)
                 .done(() => context.dispatch('serviceCurrent'))
                 .remove(asset.id)
         },
         removeAsset(context, {asset, index}) {
-            return app.$store.getters['account/isLoggedIn']
+            return this.app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceRemoveAsset', {asset})
                 : context.dispatch('cacheRemoveAsset', {index})
         },
@@ -168,12 +167,12 @@ export const holding = {
             return Promise.resolve()
         },
         serviceUpdateAssetAmount(context, {asset, amount}) {
-            return app.$service(AccountHoldingAssetService)
+            return this.app.$service(AccountHoldingAssetService)
                 .done(() => context.dispatch('serviceCurrent'))
                 .updateAmount(asset.id, amount)
         },
         updateAssetAmount(context, {asset, index, amount}) {
-            return app.$store.getters['account/isLoggedIn']
+            return this.app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceUpdateAssetAmount', {asset, amount})
                 : context.dispatch('cacheUpdateAssetAmount', {index, amount})
         },
@@ -187,7 +186,7 @@ export const holding = {
         },
         serviceMoveUpAsset(context, {index}) {
             if (index > 0) {
-                return app.$service(AccountHoldingAssetService)
+                return this.app.$service(AccountHoldingAssetService)
                     .done(() => context.dispatch('serviceCurrent'))
                     .updateOrders([
                         {
@@ -203,7 +202,7 @@ export const holding = {
             return Promise.resolve()
         },
         moveUpAsset(context, {index}) {
-            return app.$store.getters['account/isLoggedIn']
+            return this.app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceMoveUpAsset', {index})
                 : context.dispatch('cacheMoveUpAsset', {index})
         },
@@ -217,7 +216,7 @@ export const holding = {
         },
         serviceMoveDownAsset(context, {index}) {
             if (index < context.state.assets.length - 1) {
-                return app.$service(AccountHoldingAssetService)
+                return this.app.$service(AccountHoldingAssetService)
                     .done(() => context.dispatch('serviceCurrent'))
                     .updateOrders([
                         {
@@ -233,7 +232,7 @@ export const holding = {
             return Promise.resolve()
         },
         moveDownAsset(context, {index}) {
-            return app.$store.getters['account/isLoggedIn']
+            return this.app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceMoveDownAsset', {index})
                 : context.dispatch('cacheMoveDownAsset', {index})
         },
@@ -253,7 +252,7 @@ export const holding = {
         },
         serviceSortAsset(context, {sortFunc, ascending = true}) {
             const func = (asset1, asset2) => ascending ? sortFunc(asset1, asset2) : 0 - sortFunc(asset1, asset2)
-            return app.$service(AccountHoldingAssetService)
+            return this.app.$service(AccountHoldingAssetService)
                 .done(() => context.dispatch('serviceCurrent'))
                 .updateOrders(
                     context.state.assets
@@ -266,19 +265,19 @@ export const holding = {
                 )
         },
         sortAsset(context, {sortFunc, ascending = true}) {
-            return app.$store.getters['account/isLoggedIn']
+            return this.app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceSortAsset', {sortFunc, ascending})
                 : context.dispatch('cacheSortAsset', {sortFunc, ascending})
         },
         sortAssetBySymbol(context, ascending = true) {
             const sortFunc = (asset1, assets2) => asset1.symbol < assets2.symbol ? -1 : (asset1.symbol > assets2.symbol ? 1 : 0)
-            return app.$store.getters['account/isLoggedIn']
+            return this.app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceSortAsset', {sortFunc, ascending})
                 : context.dispatch('cacheSortAsset', {sortFunc, ascending})
         },
         sortAssetByPriceTotal(context, ascending = true) {
             const sortFunc = (asset1, assets2) => asset1.price * asset1.amount - assets2.price * assets2.amount
-            return app.$store.getters['account/isLoggedIn']
+            return this.app.$store.getters['account/isLoggedIn']
                 ? context.dispatch('serviceSortAsset', {sortFunc, ascending})
                 : context.dispatch('cacheSortAsset', {sortFunc, ascending})
         },

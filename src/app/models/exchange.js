@@ -1,4 +1,3 @@
-import {app} from '@/bootstrap/app'
 import {ExchangeService} from '@/app/services/starter/exchange-service'
 
 export const exchange = {
@@ -16,7 +15,7 @@ export const exchange = {
             const all = context.getters.all
             return all.length
                 ? new Promise(resolve => resolve(all))
-                : app.$service(ExchangeService).done(data => {
+                : this.app.$service(ExchangeService).done(data => {
                     context.commit('setAll', data.exchanges)
                     return data
                 }).index()
