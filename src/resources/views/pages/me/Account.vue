@@ -1,8 +1,8 @@
 <template lang="pug">
 .account.text-center
     h2.mb-3 Account
-    .text-black {{ account.name }}
-    .text-black-50.small {{ account.email }}
+    .text-black {{ accountName }}
+    .text-black-50.small {{ accountEmail }}
 </template>
 
 <script>
@@ -15,6 +15,12 @@ export default {
         ...mapGetters({
             account: 'account/account',
         }),
+        accountName() {
+            return this.account?.name
+        },
+        accountEmail() {
+            return this.account?.email
+        },
     },
 }
 </script>
