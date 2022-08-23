@@ -6,10 +6,6 @@ export const app = {
     name: env.VUE_APP_NAME || 'Starter',
     url: window.location.origin + trim(env.BASE_URL, '/'),
 
-    ping: {
-        expired_in: 60 * 1000, // 1 minute
-    },
-
     routes: {
         root: {
             name: 'root',
