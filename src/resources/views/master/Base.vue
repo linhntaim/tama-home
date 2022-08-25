@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from 'vuex'
+import {mapGetters, mapMutations} from 'vuex'
 
 export default {
     // eslint-disable-next-line
@@ -21,7 +21,7 @@ export default {
     data() {
         return {
             appName: this.$config.app.name,
-
+            loginRoute: this.$config.app.routes.login,
             menu: [
                 {
                     label: 'Holding',
@@ -72,9 +72,7 @@ export default {
                 items.push(
                     {
                         label: 'Login',
-                        to: {
-                            name: 'login',
-                        },
+                        to: this.loginRoute,
                     },
                     {
                         label: 'Register',
@@ -94,11 +92,12 @@ export default {
         },
     },
     methods: {
-        ...mapActions({
-            accountLogout: 'account/sanctumLogout',
+        ...mapMutations({
+            accountActivateLogout: 'account/activateLogout',
         }),
         onLogoutClick() {
-            this.accountLogout().then(() => this.$router.push({name: 'root'}))
+            this.accountActivateLogout()
+            this.$router.push(this.$config.app.routes.logout)
         },
     },
 }
