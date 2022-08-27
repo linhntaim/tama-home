@@ -4,6 +4,7 @@ import {trim} from 'locutus/php/strings'
 export const app = {
     id: env.VUE_APP_ID || 'starter',
     name: env.VUE_APP_NAME || 'Starter',
+    description: env.VUE_APP_DESCRIPTION || 'A starter on Vue.js.',
     url: window.location.origin + trim(env.BASE_URL, '/'),
 
     routes: {
